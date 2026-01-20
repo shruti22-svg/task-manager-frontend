@@ -1,38 +1,26 @@
-import Welcome from './components/layout/Welcome'
-import Counter from './components/common/Counter'
-import TaskList from './components/tasks/TaskList'
-import TaskCard from './components/tasks/TaskCard'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Navbar from './components/layout/Navbar'
+import HomePage from './pages/HomePage'
+import TasksPage from './pages/TasksPage'
+import AboutPage from './pages/AboutPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   return (
-    <div style={{ padding: '20px'}}>
-      <h1>Task Manager App</h1>
-      <Welcome />
-      
-      <Counter />
-      
-      <TaskList />
+    <BrowserRouter>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+        <Navbar />
         
-        <TaskCard 
-        title="Learn React"
-        description="Complete React tutorial"
-        status="in-progress"
-        priority="high"
-        />
-      
-      <TaskCard 
-        title="Build Project"
-        description="Create task manager app"
-        status="pending"
-        priority="medium"
-      />
-      <TaskCard
-        title="Deploy App"
-        description="Deploy to production"
-        status="pending"
-        priority="low"
-      />
-    </div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
+      </div>
+    </BrowserRouter>
   )
 }
 
