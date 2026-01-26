@@ -1,4 +1,8 @@
-function TaskCard({ task, onDelete }) {
+import { useTheme } from '../../context/ThemeContext'
+
+function TaskCard({ task, onDelete, onUpdate }) {
+  const { theme } = useTheme()
+  
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high': return '#e74c3c'
@@ -17,22 +21,29 @@ function TaskCard({ task, onDelete }) {
     }
   }
   
+  const handleStatusChange = (e) => {
+    onUpdate(task.id, { status: e.target.value })
+  }
+  
+  const cardStyle = {
+    border: `2px solid ${theme === 'light' ? '#ddd' : '#555'}`,
+    padding: '20px',
+    margin: '15px 0',
+    borderRadius: '8px',
+    backgroundColor: theme === 'light' ? 'white' : '#2c3e50',
+    color: theme === 'light' ? '#333' : '#ecf0f1',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+  }
+  
   return (
-    <div style={{
-      border: '2px solid #ddd',
-      padding: '20px',
-      margin: '15px 0',
-      borderRadius: '8px',
-      backgroundColor: 'white',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-    }}>
+    <div style={cardStyle}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'start',
         marginBottom: '10px'
       }}>
-        <h3 style={{ margin: 0, color: '#2c3e50' }}>
+        <h3 style={{ margin: 0 }}>
           {task.title}
         </h3>
         
@@ -52,14 +63,16 @@ function TaskCard({ task, onDelete }) {
         </button>
       </div>
       
-      <p style={{ color: '#666', marginBottom: '15px' }}>
+      <p style={{ color: theme === 'light' ? '#666' : '#bdc3c7', marginBottom: '15px' }}>
         {task.description}
       </p>
       
       <div style={{
         display: 'flex',
         gap: '10px',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        marginBottom: '15px'
       }}>
         <span style={{
           padding: '4px 12px',
@@ -87,11 +100,38 @@ function TaskCard({ task, onDelete }) {
           padding: '4px 12px',
           borderRadius: '4px',
           fontSize: '12px',
-          border: '1px solid #ddd',
-          color: '#666'
+          border: `1px solid ${theme === 'light' ? '#ddd' : '#555'}`,
+          color: theme === 'light' ? '#666' : '#bdc3c7'
         }}>
           📅 Due: {new Date(task.dueDate).toLocaleDateString()}
         </span>
+      </div>
+      
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+      }}>
+        <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
+          Update Status:
+        </label>
+        <select
+          value={task.status}
+          onChange={handleStatusChange}
+          style={{
+            padding: '6px 12px',
+            borderRadius: '4px',
+            border: `1px solid ${theme === 'light' ? '#ddd' : '#555'}`,
+            backgroundColor: theme === 'light' ? 'white' : '#34495e',
+            color: theme === 'light' ? '#333' : '#ecf0f1',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
       </div>
     </div>
   )

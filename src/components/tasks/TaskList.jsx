@@ -1,72 +1,107 @@
-import { useState } from 'react'
 import TaskCard from './TaskCard'
 import TaskForm from './TaskForm'
+import { useTasks } from '../../context/TaskContext'
+import { useTheme } from '../../context/ThemeContext'
 
 function TaskList() {
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      title: 'Learn React',
-      description: 'Complete React tutorial and build projects',
-      status: 'in-progress',
-      priority: 'high',
-      dueDate: '2026-01-25',
-      createdAt: '2026-01-19'
-    },
-    {
-      id: 2,
-      title: 'Build Portfolio',
-      description: 'Create a professional portfolio website',
-      status: 'pending',
-      priority: 'medium',
-      dueDate: '2026-02-01',
-      createdAt: '2026-01-19'
-    },
-    {
-      id: 3,
-      title: 'Job Applications',
-      description: 'Apply to 5 companies this week',
-      status: 'pending',
-      priority: 'high',
-      dueDate: '2026-01-22',
-      createdAt: '2026-01-19'
-    }
-  ])
+  const { filteredTasks, filter, setFilter, addTask, deleteTask, updateTask } = useTasks()
+  const { theme } = useTheme()
   
-  const handleAddTask = (newTask) => {
-    setTasks(prev => [...prev, newTask])
+  const handleAddTask = (taskData) => {
+    addTask(taskData)
   }
   
   const handleDeleteTask = (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
-      setTasks(prev => prev.filter(task => task.id !== taskId))
+      deleteTask(taskId)
     }
   }
+  
+  const handleUpdateTask = (taskId, updates) => {
+    updateTask(taskId, updates)
+  }
+  
+  const filterButtonStyle = (filterType) => ({
+    padding: '8px 16px',
+    margin: '5px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontWeight: filter === filterType ? 'bold' : 'normal',
+    backgroundColor: filter === filterType 
+      ? (theme === 'light' ? '#3498db' : '#f39c12')
+      : (theme === 'light' ? '#ecf0f1' : '#34495e'),
+    color: filter === filterType 
+      ? 'white' 
+      : (theme === 'light' ? '#333' : '#ecf0f1')
+  })
   
   return (
     <div>
       <TaskForm onAddTask={handleAddTask} />
       
-      <h2>My Tasks ({tasks.length})</h2>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px'
+      }}>
+        <h2 style={{ margin: 0 }}>
+          My Tasks ({filteredTasks.length})
+        </h2>
+        
+        <div>
+          <button 
+            onClick={() => setFilter('all')}
+            style={filterButtonStyle('all')}
+          >
+            All
+          </button>
+          <button 
+            onClick={() => setFilter('pending')}
+            style={filterButtonStyle('pending')}
+          >
+            Pending
+          </button>
+          <button 
+            onClick={() => setFilter('in-progress')}
+            style={filterButtonStyle('in-progress')}
+          >
+            In Progress
+          </button>
+          <button 
+            onClick={() => setFilter('completed')}
+            style={filterButtonStyle('completed')}
+          >
+            Completed
+          </button>
+        </div>
+      </div>
       
-      {tasks.length === 0 ? (
+      {filteredTasks.length === 0 ? (
         <div style={{
           padding: '40px',
           textAlign: 'center',
-          backgroundColor: '#f8f9fa',
+          backgroundColor: theme === 'light' ? '#f8f9fa' : '#2c3e50',
           borderRadius: '8px',
-          color: '#666'
+          color: theme === 'light' ? '#666' : '#bdc3c7'
         }}>
           <p style={{ fontSize: '48px' }}>📝</p>
-          <h3>No tasks yet!</h3>
-          <p>Add your first task using the form above.</p>
+          <h3>No tasks found!</h3>
+          <p>
+            {filter === 'all' 
+              ? 'Add your first task using the form above.'
+              : `No tasks with status: ${filter}`
+            }
+          </p>
         </div>
       ) : (
-        tasks.map((task) => (
+        filteredTasks.map((task) => (
           <TaskCard 
             key={task.id}
             task={task}
             onDelete={handleDeleteTask}
+            onUpdate={handleUpdateTask}
           />
         ))
       )}
