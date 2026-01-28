@@ -7,7 +7,6 @@ import NotFoundPage from './pages/NotFoundPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ThemeSwitcher from './components/common/ThemeSwitcher'
-import ProtectedRoute from './components/common/ProtectedRoute'
 import { useTheme } from './context/ThemeContext'
 
 function App() {
@@ -37,16 +36,6 @@ function App() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
           <Routes>
             <Route path="/" element={<HomePage />} />
-
-            <Route 
-              path="/tasks" 
-              element={
-                <ProtectedRoute>
-                  <TasksPage />
-                </ProtectedRoute>
-              } 
-            />
-
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/login" element={<LoginPage />} />

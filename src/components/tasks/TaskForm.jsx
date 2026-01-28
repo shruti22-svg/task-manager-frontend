@@ -10,6 +10,7 @@ function TaskForm({ onAddTask }) {
   })
   
   const [errors, setErrors] = useState({})
+  const [loading, setLoading] = useState(false)
   
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -48,7 +49,7 @@ function TaskForm({ onAddTask }) {
     return newErrors
   }
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     const newErrors = validate()
@@ -58,15 +59,16 @@ function TaskForm({ onAddTask }) {
       return
     }
     
-    // Create task object
-    const newTask = {
-      id: Date.now(), // Simple ID for now
-      ...formData,
-      createdAt: new Date().toISOString()
-    }
+    setLoading(true)
     
-    // Call parent function
-    onAddTask(newTask)
+    // Add task via context (which calls backend)
+    const result = await onAddTask(formData)
+    
+    if (result && result.success === false) {
+      setErrors({ general: result.error })
+      setLoading(false)
+      return
+    }
     
     // Reset form
     setFormData({
@@ -77,9 +79,11 @@ function TaskForm({ onAddTask }) {
       dueDate: ''
     })
     
+    setLoading(false)
     alert('Task added successfully!')
   }
   
+  // ADD THE RETURN STATEMENT HERE! ⬇️
   return (
     <div style={{
       border: '2px solid #3498db',
@@ -224,18 +228,19 @@ function TaskForm({ onAddTask }) {
         
         <button 
           type="submit"
+          disabled={loading}
           style={{
-            backgroundColor: '#2ecc71',
+            backgroundColor: loading ? '#95a5a6' : '#2ecc71',
             color: 'white',
             padding: '12px 30px',
             border: 'none',
             borderRadius: '4px',
             fontSize: '16px',
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
             fontWeight: 'bold'
           }}
         >
-          Add Task
+          {loading ? 'Adding Task...' : 'Add Task'}
         </button>
       </form>
     </div>

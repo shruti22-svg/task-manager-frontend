@@ -7,19 +7,20 @@ function TaskList() {
   const { filteredTasks, filter, setFilter, addTask, deleteTask, updateTask } = useTasks()
   const { theme } = useTheme()
   
-  const handleAddTask = (taskData) => {
-    addTask(taskData)
+  const handleAddTask = async (taskData) => {
+  const result = await addTask(taskData)
+  return result
+}
+
+const handleDeleteTask = async (taskId) => {
+  if (window.confirm('Are you sure you want to delete this task?')) {
+    await deleteTask(taskId)
   }
-  
-  const handleDeleteTask = (taskId) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTask(taskId)
-    }
-  }
-  
-  const handleUpdateTask = (taskId, updates) => {
-    updateTask(taskId, updates)
-  }
+}
+
+const handleUpdateTask = async (taskId, updates) => {
+  await updateTask(taskId, updates)
+}
   
   const filterButtonStyle = (filterType) => ({
     padding: '8px 16px',

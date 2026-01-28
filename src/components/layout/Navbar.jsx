@@ -1,10 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useTheme } from '../../context/ThemeContext'
 import { useAuth } from '../../context/AuthContext'
+import { useTasks } from '../../context/TaskContext'
 
 function Navbar() {
   const { theme } = useTheme()
   const { user, isAuthenticated, logout } = useAuth()
+  const { loading } = useTasks()
   const navigate = useNavigate()
   
   const handleLogout = () => {
@@ -53,16 +55,38 @@ function Navbar() {
         margin: '0 auto'
       }}>
         <NavLink 
-          to="/" 
-          style={{ 
-            color: theme === 'light' ? 'white' : '#ecf0f1',
-            textDecoration: 'none',
-            fontSize: '24px',
-            fontWeight: 'bold'
-          }}
-        >
-          📝 TaskManager
-        </NavLink>
+  to="/" 
+  style={{ 
+    color: theme === 'light' ? 'white' : '#ecf0f1',
+    textDecoration: 'none',
+    fontSize: '24px',
+    fontWeight: 'bold'
+  }}
+>
+  📝 TaskManager
+</NavLink>
+
+{loading && (
+  <div style={{
+    marginLeft: '15px',
+    padding: '4px 12px',
+    backgroundColor: theme === 'light' ? '#f39c12' : '#f5b041',
+    borderRadius: '12px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: 'white',
+    animation: 'pulse 1.5s ease-in-out infinite'
+  }}>
+    Loading...
+  </div>
+)}
+
+<style>{`
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+`}</style>
         
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           <NavLink 

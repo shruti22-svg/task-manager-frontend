@@ -21,8 +21,8 @@ function TaskCard({ task, onDelete, onUpdate }) {
     }
   }
   
-  const handleStatusChange = (e) => {
-    onUpdate(task.id, { status: e.target.value })
+  const handleStatusChange = async (e) => {
+    await onUpdate(task.id, { status: e.target.value })
   }
   
   const cardStyle = {
@@ -46,21 +46,7 @@ function TaskCard({ task, onDelete, onUpdate }) {
         <h3 style={{ margin: 0 }}>
           {task.title}
         </h3>
-        
-        <button 
-          onClick={() => onDelete(task.id)}
-          style={{
-            backgroundColor: '#e74c3c',
-            color: 'white',
-            border: 'none',
-            padding: '6px 12px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '12px'
-          }}
-        >
-          Delete
-        </button>
+    
       </div>
       
       <p style={{ color: theme === 'light' ? '#666' : '#bdc3c7', marginBottom: '15px' }}>

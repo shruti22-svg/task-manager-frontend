@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from 'react'
+import taskService from '../services/taskService'
 
-// Create Context
 const TaskContext = createContext()
 
 // Initial State
@@ -8,7 +8,7 @@ const initialState = {
   tasks: [],
   loading: false,
   error: null,
-  filter: 'all' // 'all', 'pending', 'in-progress', 'completed'
+  filter: 'all'
 }
 
 // Reducer
@@ -18,27 +18,31 @@ function taskReducer(state, action) {
       return {
         ...state,
         tasks: action.payload,
-        loading: false
+        loading: false,
+        error: null
       }
     
     case 'ADD_TASK':
       return {
         ...state,
-        tasks: [...state.tasks, action.payload]
+        tasks: [...state.tasks, action.payload],
+        error: null
       }
     
     case 'UPDATE_TASK':
       return {
         ...state,
         tasks: state.tasks.map(task =>
-          task.id === action.payload.id ? action.payload : task
-        )
+          task._id === action.payload._id ? action.payload : task
+        ),
+        error: null
       }
     
     case 'DELETE_TASK':
       return {
         ...state,
-        tasks: state.tasks.filter(task => task.id !== action.payload)
+        tasks: state.tasks.filter(task => task._id !== action.payload),
+        error: null
       }
     
     case 'SET_FILTER':
@@ -69,70 +73,64 @@ function taskReducer(state, action) {
 export function TaskProvider({ children }) {
   const [state, dispatch] = useReducer(taskReducer, initialState)
   
-  // Load tasks from localStorage on mount
-  useEffect(() => {
-    const storedTasks = localStorage.getItem('tasks')
-    if (storedTasks) {
-      dispatch({ type: 'SET_TASKS', payload: JSON.parse(storedTasks) })
+  // Load tasks from backend
+  const fetchTasks = async () => {
+    dispatch({ type: 'SET_LOADING', payload: true })
+    
+    const result = await taskService.getAllTasks()
+    
+    if (result.success) {
+      dispatch({ type: 'SET_TASKS', payload: result.data })
     } else {
-      // Default tasks
-      const defaultTasks = [
-        {
-          id: 1,
-          title: 'Learn Context API',
-          description: 'Master React Context API and useReducer',
-          status: 'in-progress',
-          priority: 'high',
-          dueDate: '2026-01-25',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 2,
-          title: 'Build Full Stack App',
-          description: 'Complete the task manager application',
-          status: 'pending',
-          priority: 'high',
-          dueDate: '2026-02-01',
-          createdAt: new Date().toISOString()
-        }
-      ]
-      dispatch({ type: 'SET_TASKS', payload: defaultTasks })
+      dispatch({ type: 'SET_ERROR', payload: result.error })
     }
-  }, [])
-  
-  // Save tasks to localStorage whenever they change
-  useEffect(() => {
-    if (state.tasks.length > 0) {
-      localStorage.setItem('tasks', JSON.stringify(state.tasks))
-    }
-  }, [state.tasks])
+  }
   
   // Actions
-  const addTask = (task) => {
-    const newTask = {
-      ...task,
-      id: Date.now(),
-      createdAt: new Date().toISOString()
-    }
-    dispatch({ type: 'ADD_TASK', payload: newTask })
-  }
-  
-  const updateTask = (taskId, updates) => {
-    const task = state.tasks.find(t => t.id === taskId)
-    if (task) {
-      dispatch({ 
-        type: 'UPDATE_TASK', 
-        payload: { ...task, ...updates } 
-      })
+  const addTask = async (taskData) => {
+    dispatch({ type: 'SET_LOADING', payload: true })
+    
+    const result = await taskService.createTask(taskData)
+    
+    if (result.success) {
+      dispatch({ type: 'ADD_TASK', payload: result.data })
+      return { success: true }
+    } else {
+      dispatch({ type: 'SET_ERROR', payload: result.error })
+      return { success: false, error: result.error }
     }
   }
   
-  const deleteTask = (taskId) => {
-    dispatch({ type: 'DELETE_TASK', payload: taskId })
+  const updateTask = async (taskId, updates) => {
+    const result = await taskService.updateTask(taskId, updates)
+    
+    if (result.success) {
+      dispatch({ type: 'UPDATE_TASK', payload: result.data })
+      return { success: true }
+    } else {
+      dispatch({ type: 'SET_ERROR', payload: result.error })
+      return { success: false, error: result.error }
+    }
+  }
+  
+  const deleteTask = async (taskId) => {
+    const result = await taskService.deleteTask(taskId)
+    
+    if (result.success) {
+      dispatch({ type: 'DELETE_TASK', payload: taskId })
+      return { success: true }
+    } else {
+      dispatch({ type: 'SET_ERROR', payload: result.error })
+      return { success: false, error: result.error }
+    }
   }
   
   const setFilter = (filter) => {
     dispatch({ type: 'SET_FILTER', payload: filter })
+  }
+  
+  const clearError = () => {
+    dispatch({ type: 'SET_ERROR', payload: null })
   }
   
   // Get filtered tasks
@@ -149,10 +147,12 @@ export function TaskProvider({ children }) {
     loading: state.loading,
     error: state.error,
     filter: state.filter,
+    fetchTasks,
     addTask,
     updateTask,
     deleteTask,
-    setFilter
+    setFilter,
+    clearError
   }
   
   return (

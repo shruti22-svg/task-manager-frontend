@@ -17,7 +17,8 @@ function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    
+    setLoading(true)
+
     // Validate
     if (!email || !password) {
       setError('Please fill in all fields')
@@ -26,7 +27,7 @@ function LoginPage() {
     }
     
     // Login
-    const result = login(email, password)
+    const result = await login(email, password)
     
     if (result.success) {
       navigate('/tasks')
